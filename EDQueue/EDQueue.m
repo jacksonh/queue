@@ -160,9 +160,10 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
  */
 - (void)start
 {
+    [self.engine promoteDeferredJobs];
+
     if (!self.isRunning) {
         _isRunning = YES;
-        [self.engine promoteDeferredJobs];
         [self tick];
         [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueDidStart, @"name", nil, @"data", nil] waitUntilDone:false];
     }
