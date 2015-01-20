@@ -80,13 +80,13 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
  */
 - (void)enqueueWithData:(id)data forTask:(NSString *)task
 {
-    [self enqueueWithData:data priority:EDQueuePriorityDefault flags:EDQueueFlagsNone forTask:task];
+    [self enqueueWithData:data priority:EDQueuePriorityDefault forTask:task];
 }
 
-- (void)enqueueWithData:(id)data priority:(EDQueuePriority)priority flags:(EDQueueFlags)flags forTask:(NSString *)task
+- (void)enqueueWithData:(id)data priority:(EDQueuePriority)priority forTask:(NSString *)task
 {
     if (data == nil) data = @{};
-    [self.engine createJob:data priority:priority flags:0 forTask:task inGroup:self.currentGroup];
+    [self.engine createJob:data priority:priority forTask:task inGroup:self.currentGroup];
     [self tick];
 }
 

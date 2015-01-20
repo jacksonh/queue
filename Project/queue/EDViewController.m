@@ -52,11 +52,15 @@
 
 - (IBAction)addGroup:(id)sender
 {
+    [[EDQueue sharedInstance] stop];
+
     [[EDQueue sharedInstance] enqueueGroup:@"_myGroup_" withBlock:^(EDQueue *queue) {
         [queue enqueueWithData:@{ @"name": @"job 01" }  forTask:@"groupTask"];
         [queue enqueueWithData:@{ @"name": @"job 02", @"fail": @(YES) }  forTask:@"groupTask"];
-        [queue enqueueWithData:@{ @"name": @"job 03" } priority:EDQueuePriorityHigh flags:EDQueueFlagsNone forTask:@"groupTask"];
+        [queue enqueueWithData:@{ @"name": @"job 03" } priority:EDQueuePriorityHigh forTask:@"groupTask"];
     }];
+
+    [[EDQueue sharedInstance] start];
 }
      
 #pragma mark - Notifications

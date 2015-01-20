@@ -25,11 +25,11 @@
         NSArray *paths                  = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask,YES);
         NSString *documentsDirectory    = [paths objectAtIndex:0];
         NSString *path                  = [documentsDirectory stringByAppendingPathComponent:@"edqueue_0.5.0d.db"];
-        
+
         // Allocate the queue
         _queue                          = [[FMDatabaseQueue alloc] initWithPath:path];
         [self.queue inDatabase:^(FMDatabase *db) {
-            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, group_name TEXT, flags INTEGER DEFAULT 0, priority INTEGER DEFAULT 0, data TEXT NOT NULL, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT)"];
+            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, group_name TEXT, priority INTEGER DEFAULT 0, data TEXT NOT NULL, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT)"];
             [self _databaseHadError:[db hadError] fromDatabase:db];
             NSLog (@"db error:  %d", db.hadError);
         }];
@@ -53,12 +53,12 @@
  *
  * @return {void}
  */
-- (void)createJob:(id)data priority:(NSInteger)priority flags:(NSInteger)flags forTask:(id)task inGroup:(NSString *)group
+- (void)createJob:(id)data priority:(NSInteger)priority forTask:(id)task inGroup:(NSString *)group
 {
     NSString *dataString = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding];
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"INSERT INTO queue (task, group_name, flags, priority, data) VALUES (?, ?, ?, ?, ?)", task, group, @(flags), @(priority), dataString];
+        [db executeUpdate:@"INSERT INTO queue (task, group_name, priority, data) VALUES (?, ?, ?, ?)", task, group,  @(priority), dataString];
         [self _databaseHadError:[db hadError] fromDatabase:db];
     }];
 }
@@ -234,7 +234,6 @@
         @"task":        [rs stringForColumn:@"task"],
         @"data":        [NSJSONSerialization JSONObjectWithData:[[rs stringForColumn:@"data"] dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil],
         @"priority":    @([rs intForColumn:@"priority"]),
-        @"flags":       @([rs intForColumn:@"flags"]),
         @"attempts":    [NSNumber numberWithInt:[rs intForColumn:@"attempts"]],
         @"stamp":       [rs stringForColumn:@"stamp"]
     };

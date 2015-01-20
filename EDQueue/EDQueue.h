@@ -20,11 +20,6 @@ typedef NS_ENUM(NSInteger, EDQueuePriority) {
     EDQueuePriorityHigh,
 };
 
-typedef NS_ENUM(NSInteger, EDQueueFlags) {
-    EDQueueFlagsNone = 0,
-    EDQueueFlagsWiFiOnly = 2,
-};
-
 typedef void (^EDQueueCompletionBlock)(EDQueueResult result);
 
 extern NSString *const EDQueueDidStart;
@@ -46,7 +41,7 @@ extern NSString *const EDQueueDidDrain;
 @property (nonatomic) NSUInteger retryLimit;
 
 - (void)enqueueWithData:(id)data forTask:(NSString *)task;
-- (void)enqueueWithData:(id)data priority:(EDQueuePriority)priority flags:(EDQueueFlags)flags forTask:(NSString *)task;
+- (void)enqueueWithData:(id)data priority:(EDQueuePriority)priority forTask:(NSString *)task;
 
 - (void)enqueueGroup:(NSString *)groupName withBlock:(void (^)(EDQueue *))block;
 
