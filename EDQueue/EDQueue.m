@@ -13,6 +13,7 @@ NSString *const EDQueueDidStart = @"EDQueueDidStart";
 NSString *const EDQueueDidStop = @"EDQueueDidStop";
 NSString *const EDQueueJobDidSucceed = @"EDQueueJobDidSucceed";
 NSString *const EDQueueJobDidFail = @"EDQueueJobDidFail";
+NSString *const EDQueueGroupDidComplete = @"EDQueueGroupDidComplete";
 NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 
 @interface EDQueue ()
@@ -252,7 +253,12 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
     
     // Clean-up
     _isActive = NO;
-    
+
+    NSString *group = job[@"group"];
+    if (group && [self.engine fetchJobCountForGroup:group] == 0) {
+        [self performSelectorOnMainThread:@selector(postNotification:) withObject:@{ @"name": EDQueueGroupDidComplete, @"data": @{ @"group": group }} waitUntilDone:false];
+    }
+
     // Drain
     if ([self.engine fetchJobCount] == 0) {
         [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueDidDrain, @"name", nil, @"data", nil] waitUntilDone:false];

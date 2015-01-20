@@ -155,6 +155,29 @@
 }
 
 /**
+ * Returns the total number of jobs within the datastore for the supplied group.
+ *
+ * @return {uint}
+ */
+- (NSUInteger)fetchJobCountForGroup:(NSString *)group
+{
+    __block NSUInteger count = 0;
+
+    [self.queue inDatabase:^(FMDatabase *db) {
+        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE group_name = ?", group];
+        [self _databaseHadError:[db hadError] fromDatabase:db];
+
+        while ([rs next]) {
+            count = [rs intForColumn:@"count"];
+        }
+
+        [rs close];
+    }];
+
+    return count;
+}
+
+/**
  * Returns the oldest job from the datastore.
  *
  * @return {NSDictionary}
@@ -210,9 +233,17 @@
         @"id":          [NSNumber numberWithInt:[rs intForColumn:@"id"]],
         @"task":        [rs stringForColumn:@"task"],
         @"data":        [NSJSONSerialization JSONObjectWithData:[[rs stringForColumn:@"data"] dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil],
+        @"priority":    @([rs intForColumn:@"priority"]),
+        @"flags":       @([rs intForColumn:@"flags"]),
         @"attempts":    [NSNumber numberWithInt:[rs intForColumn:@"attempts"]],
         @"stamp":       [rs stringForColumn:@"stamp"]
     };
+    NSString *group = [rs stringForColumn:@"group_name"];
+    if (group) {
+        job = [job mutableCopy];
+        [job setValue:group forKey:@"group"];
+        job = [job copy];
+    }
     return job;
 }
 

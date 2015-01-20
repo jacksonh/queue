@@ -25,6 +25,7 @@
     [nc addObserver:self selector:@selector(receivedNotification:) name:@"EDQueueDidStart" object:nil];
     [nc addObserver:self selector:@selector(receivedNotification:) name:@"EDQueueDidStop" object:nil];
     [nc addObserver:self selector:@selector(receivedNotification:) name:@"EDQueueDidDrain" object:nil];
+    [nc addObserver:self selector:@selector(receivedNotification:) name:@"EDQueueGroupDidComplete" object:nil];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

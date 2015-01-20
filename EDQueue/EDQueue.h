@@ -31,6 +31,7 @@ extern NSString *const EDQueueDidStart;
 extern NSString *const EDQueueDidStop;
 extern NSString *const EDQueueJobDidSucceed;
 extern NSString *const EDQueueJobDidFail;
+extern NSString *const EDQueueGroupDidComplete;
 extern NSString *const EDQueueDidDrain;
 
 @protocol EDQueueDelegate;
