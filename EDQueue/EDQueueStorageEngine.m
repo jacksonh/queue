@@ -58,7 +58,7 @@
     NSString *dataString = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding];
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"INSERT INTO queue (task, group_name, flags, priority, data) VALUES (?, ?, ?, ?, ?)", task, group, flags, priority, dataString];
+        [db executeUpdate:@"INSERT INTO queue (task, group_name, flags, priority, data) VALUES (?, ?, ?, ?, ?)", task, group, @(flags), @(priority), dataString];
         [self _databaseHadError:[db hadError] fromDatabase:db];
     }];
 }
@@ -187,9 +187,9 @@
     __block id job;
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY id ASC LIMIT 1"];
+        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY priority DESC, id ASC LIMIT 1"];
         [self _databaseHadError:[db hadError] fromDatabase:db];
-        
+
         while ([rs next]) {
             job = [self _jobFromResultSet:rs];
         }
@@ -212,13 +212,13 @@
     __block id job;
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue WHERE task = ? ORDER BY id ASC LIMIT 1", task];
+        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue WHERE task = ? ORDER BY priority DESC, id ASC LIMIT 1", task];
         [self _databaseHadError:[db hadError] fromDatabase:db];
-        
+
         while ([rs next]) {
             job = [self _jobFromResultSet:rs];
         }
-        
+
         [rs close];
     }];
     
