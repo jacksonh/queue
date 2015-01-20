@@ -46,6 +46,8 @@
             block(EDQueueResultSuccess);
         } else if ([[job objectForKey:@"task"] isEqualToString:@"fail"]) {
             block(EDQueueResultFail);
+        } else if ([[job objectForKey:@"task"] isEqualToString:@"groupTask"]) {
+            block(job[@"data"][@"fail"] ? EDQueueResultCritical : EDQueueResultSuccess);
         } else {
             block(EDQueueResultCritical);
         }

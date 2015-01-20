@@ -48,6 +48,14 @@
 {
     [[EDQueue sharedInstance] enqueueWithData:nil forTask:@"critical"];
 }
+
+- (IBAction)addGroup:(id)sender
+{
+    [[EDQueue sharedInstance] enqueueGroup:@"_myGroup_" withBlock:^(EDQueue *queue) {
+        [queue enqueueWithData:@{ @"name": @"job 01" }  forTask:@"groupTask"];
+        [queue enqueueWithData:@{ @"name": @"job 02", @"fail": @(YES) }  forTask:@"groupTask"];
+    }];
+}
      
 #pragma mark - Notifications
      
