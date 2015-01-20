@@ -13,7 +13,7 @@
 
 @property (retain) FMDatabaseQueue *queue;
 
-- (void)createJob:(id)data forTask:(id)task;
+- (void)createJob:(id)data priority:(NSInteger)priority flags:(NSInteger)flags forTask:(id)task inGroup:(NSString *)group;
 - (BOOL)jobExistsForTask:(id)task;
 - (void)incrementAttemptForJob:(NSNumber *)jid;
 - (void)removeJob:(NSNumber *)jid;

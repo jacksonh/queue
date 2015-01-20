@@ -29,11 +29,12 @@
         // Allocate the queue
         _queue                          = [[FMDatabaseQueue alloc] initWithPath:path];
         [self.queue inDatabase:^(FMDatabase *db) {
-            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, data TEXT NOT NULL, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT)"];
+            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, group_name TEXT, flags INTEGER DEFAULT 0, priority INTEGER DEFAULT 0, data TEXT NOT NULL, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT)"];
             [self _databaseHadError:[db hadError] fromDatabase:db];
+            NSLog (@"db error:  %d", db.hadError);
         }];
     }
-    
+
     return self;
 }
 
@@ -52,12 +53,12 @@
  *
  * @return {void}
  */
-- (void)createJob:(id)data forTask:(id)task
+- (void)createJob:(id)data priority:(NSInteger)priority flags:(NSInteger)flags forTask:(id)task inGroup:(NSString *)group
 {
     NSString *dataString = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding];
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"INSERT INTO queue (task, data) VALUES (?, ?)", task, dataString];
+        [db executeUpdate:@"INSERT INTO queue (task, group_name, flags, priority, data) VALUES (?, ?, ?, ?, ?)", task, group, flags, priority, dataString];
         [self _databaseHadError:[db hadError] fromDatabase:db];
     }];
 }

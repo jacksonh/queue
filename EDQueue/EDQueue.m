@@ -25,6 +25,8 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 @property (nonatomic) EDQueueStorageEngine *engine;
 @property (nonatomic, readwrite) NSString *activeTask;
 
+@property (strong, nonatomic) NSString *currentGroup;
+
 @end
 
 //
@@ -77,9 +79,38 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
  */
 - (void)enqueueWithData:(id)data forTask:(NSString *)task
 {
+    [self enqueueWithData:data priority:EDQueuePriorityDefault flags:EDQueueFlagsNone forTask:task];
+}
+
+- (void)enqueueWithData:(id)data priority:(EDQueuePriority)priority flags:(EDQueueFlags)flags forTask:(NSString *)task
+{
     if (data == nil) data = @{};
-    [self.engine createJob:data forTask:task];
+    [self.engine createJob:data priority:priority flags:0 forTask:task inGroup:self.currentGroup];
     [self tick];
+}
+
+/**
+ * Adds a group of task to a queue, when all the jobs in the group
+ * have completed, a notification will be posted. The notification
+ * will contain a list of failing/succeeding tasks
+ *
+ * @param {id} Data
+ * @param {NSString} Task label
+ *
+ * @return {void}
+ */
+
+- (void)enqueueGroup:(NSString *)groupName withBlock:(void (^)(EDQueue *))block
+{
+    NSAssert (self.currentGroup == nil, @"attempt to enqueue group from within a group block.");
+
+    self.currentGroup = groupName;
+    @try {
+        block(self);
+    }
+    @finally {
+        self.currentGroup = nil;
+    }
 }
 
 /**
