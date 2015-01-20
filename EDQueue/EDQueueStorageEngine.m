@@ -29,7 +29,7 @@
         // Allocate the queue
         _queue                          = [[FMDatabaseQueue alloc] initWithPath:path];
         [self.queue inDatabase:^(FMDatabase *db) {
-            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, group_name TEXT, priority INTEGER DEFAULT 0, data TEXT NOT NULL, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT)"];
+            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, group_name TEXT, priority INTEGER DEFAULT 0, deferred INTEGER DEFAULT 0, data TEXT NOT NULL, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT)"];
             [self _databaseHadError:[db hadError] fromDatabase:db];
             NSLog (@"db error:  %d", db.hadError);
         }];
@@ -88,6 +88,22 @@
     return jobExists;
 }
 
+- (void)deferJob:(NSNumber *)jid
+{
+    [self.queue inDatabase:^(FMDatabase *db) {
+        [db executeUpdate:@"UPDATE queue SET deferred = 1 WHERE id = ?", jid];
+        [self _databaseHadError:[db hadError] fromDatabase:db];
+    }];
+}
+
+- (void)promoteDeferredJobs
+{
+    [self.queue inDatabase:^(FMDatabase *db) {
+        [db executeUpdate:@"UPDATE queue SET deferred = 0"];
+        [self _databaseHadError:[db hadError] fromDatabase:db];
+    }];
+}
+
 /**
  * Increments the "attempts" column for a specified job.
  *
@@ -141,7 +157,7 @@
     __block NSUInteger count = 0;
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue"];
+        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE deferred = 0"];
         [self _databaseHadError:[db hadError] fromDatabase:db];
         
         while ([rs next]) {
@@ -164,7 +180,7 @@
     __block NSUInteger count = 0;
 
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE group_name = ?", group];
+        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE group_name = ? AND deferred = 0", group];
         [self _databaseHadError:[db hadError] fromDatabase:db];
 
         while ([rs next]) {
@@ -187,7 +203,7 @@
     __block id job;
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY priority DESC, id ASC LIMIT 1"];
+        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue WHERE deferred = 0 ORDER BY priority DESC, id ASC LIMIT 1"];
         [self _databaseHadError:[db hadError] fromDatabase:db];
 
         while ([rs next]) {
@@ -212,7 +228,7 @@
     __block id job;
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue WHERE task = ? ORDER BY priority DESC, id ASC LIMIT 1", task];
+        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue WHERE deferred = 0 AND task = ? ORDER BY priority DESC, id ASC LIMIT 1", task];
         [self _databaseHadError:[db hadError] fromDatabase:db];
 
         while ([rs next]) {

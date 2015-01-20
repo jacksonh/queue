@@ -62,7 +62,12 @@
 
     [[EDQueue sharedInstance] start];
 }
-     
+
+- (IBAction)addDeferredJob:(id)sender
+{
+    [[EDQueue sharedInstance] enqueueWithData:nil forTask:@"deferredJob"];
+}
+
 #pragma mark - Notifications
      
 - (void)receivedNotification:(NSNotification *)notification

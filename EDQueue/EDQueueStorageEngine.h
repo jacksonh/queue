@@ -16,6 +16,8 @@
 - (void)createJob:(id)data priority:(NSInteger)priority forTask:(id)task inGroup:(NSString *)group;
 - (BOOL)jobExistsForTask:(id)task;
 - (void)incrementAttemptForJob:(NSNumber *)jid;
+- (void)deferJob:(NSNumber *)jid;
+- (void)promoteDeferredJobs;
 - (void)removeJob:(NSNumber *)jid;
 - (void)removeAllJobs;
 - (NSUInteger)fetchJobCount;

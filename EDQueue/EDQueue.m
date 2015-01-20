@@ -162,6 +162,7 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 {
     if (!self.isRunning) {
         _isRunning = YES;
+        [self.engine promoteDeferredJobs];
         [self tick];
         [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueDidStart, @"name", nil, @"data", nil] waitUntilDone:false];
     }
@@ -234,6 +235,9 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
         case EDQueueResultSuccess:
             [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueJobDidSucceed, @"name", job, @"data", nil] waitUntilDone:false];
             [self.engine removeJob:[job objectForKey:@"id"]];
+            break;
+        case EDQueueResultDefer:
+            [self.engine deferJob:job[@"id"]];
             break;
         case EDQueueResultFail:
             [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueJobDidFail, @"name", job, @"data", nil] waitUntilDone:true];

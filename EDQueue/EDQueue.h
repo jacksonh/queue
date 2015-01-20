@@ -10,6 +10,7 @@
 
 typedef NS_ENUM(NSInteger, EDQueueResult) {
     EDQueueResultSuccess = 0,
+    EDQueueResultDefer,
     EDQueueResultFail,
     EDQueueResultCritical
 };

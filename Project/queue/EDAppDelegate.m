@@ -48,6 +48,10 @@
             block(EDQueueResultFail);
         } else if ([[job objectForKey:@"task"] isEqualToString:@"groupTask"]) {
             block(job[@"data"][@"fail"] ? EDQueueResultCritical : EDQueueResultSuccess);
+        } else if ([job[@"task"] isEqualToString:@"deferredJob"]) {
+            static BOOL seen = NO;
+            block(seen ? EDQueueResultSuccess : EDQueueResultDefer);
+            seen = !seen;
         } else {
             block(EDQueueResultCritical);
         }
