@@ -177,6 +177,8 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
  */
 - (void)stop
 {
+    [self.engine releaseAllLocks];
+
     if (self.isRunning) {
         _isRunning = NO;
         [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueDidStop, @"name", nil, @"data", nil] waitUntilDone:false];

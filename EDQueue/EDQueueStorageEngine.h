@@ -25,5 +25,6 @@
 - (NSDictionary *)fetchJob;
 - (BOOL)reserveJob:(NSNumber *)jid;
 - (NSDictionary *)fetchJobForTask:(id)task;
+- (void)releaseAllLocks;
 
 @end

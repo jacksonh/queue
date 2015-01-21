@@ -229,6 +229,13 @@
     return rowLocked;
 }
 
+- (void)releaseAllLocks
+{
+    [self.queue inDatabase:^(FMDatabase *db) {
+        [db executeUpdate:@"UPDATE queue set locked_at = 0"];
+    }];
+}
+
 /**
  * Returns the oldest job for the task from the datastore.
  *
