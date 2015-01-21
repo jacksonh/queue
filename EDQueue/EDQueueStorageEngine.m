@@ -91,7 +91,7 @@
 - (void)deferJob:(NSNumber *)jid
 {
     [self.queue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"UPDATE queue SET deferred = 1 WHERE id = ?", jid];
+        [db executeUpdate:@"UPDATE queue SET deferred = 1, locked_at = 0, WHERE id = ?", jid];
         [self _databaseHadError:[db hadError] fromDatabase:db];
     }];
 }
