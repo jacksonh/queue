@@ -23,6 +23,7 @@
 - (NSUInteger)fetchJobCount;
 - (NSUInteger)fetchJobCountForGroup:(NSString *)group;
 - (NSDictionary *)fetchJob;
+- (BOOL)reserveJob:(NSNumber *)jid;
 - (NSDictionary *)fetchJobForTask:(id)task;
 
 @end

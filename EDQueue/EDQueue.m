@@ -212,6 +212,11 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
             // Start job
             _isActive = YES;
             id job = [self.engine fetchJob];
+            if (![self.engine reserveJob:job[@"id"]]) {
+                NSLog (@"unable to reserve job:  %@", job);
+                return;
+            }
+
             self.activeTask = [(NSDictionary *)job objectForKey:@"task"];
             
             // Pass job to delegate
