@@ -19,12 +19,10 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 @interface EDQueue ()
 {
     BOOL _isRunning;
-    BOOL _isActive;
     NSUInteger _retryLimit;
 }
 
 @property (nonatomic) EDQueueStorageEngine *engine;
-@property (nonatomic, readwrite) NSString *activeTask;
 
 @property (strong, nonatomic) NSString *currentGroup;
 
@@ -35,7 +33,6 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 @implementation EDQueue
 
 @synthesize isRunning = _isRunning;
-@synthesize isActive = _isActive;
 @synthesize retryLimit = _retryLimit;
 
 #pragma mark - Singleton
@@ -128,19 +125,6 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 }
 
 /**
- * Returns true if the active job if for this task.
- *
- * @param {NSString} Task label
- *
- * @return {Boolean}
- */
-- (BOOL)jobIsActiveForTask:(NSString *)task
-{
-    BOOL jobIsActive = [self.activeTask length] > 0 && [self.activeTask isEqualToString:task];
-    return jobIsActive;
-}
-
-/**
  * Returns the list of jobs for this 
  *
  * @param {NSString} Task label
@@ -164,6 +148,8 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 
     if (!self.isRunning) {
         _isRunning = YES;
+        [self.engine releaseAllLocks];
+
         [self tick];
         [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueDidStart, @"name", nil, @"data", nil] waitUntilDone:false];
     }
@@ -210,27 +196,22 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 {
     dispatch_queue_t gcd = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
     dispatch_async(gcd, ^{
-        if (self.isRunning && !self.isActive && [self.engine fetchJobCount] > 0) {
+        if (self.isRunning && [self.engine fetchJobCount] > 0) {
             // Start job
-            _isActive = YES;
             id job = [self.engine fetchJob];
             if (![self.engine reserveJob:job[@"id"]]) {
                 NSLog (@"unable to reserve job:  %@", job);
                 return;
             }
-
-            self.activeTask = [(NSDictionary *)job objectForKey:@"task"];
             
             // Pass job to delegate
             if ([self.delegate respondsToSelector:@selector(queue:processJob:completion:)]) {
                 [self.delegate queue:self processJob:job completion:^(EDQueueResult result) {
                     [self processJob:job withResult:result];
-                    self.activeTask = nil;
                 }];
             } else {
                 EDQueueResult result = [self.delegate queue:self processJob:job];
                 [self processJob:job withResult:result];
-                self.activeTask = nil;
             }
         }
     });
@@ -262,9 +243,6 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
             [self.engine removeJob:[job objectForKey:@"id"]];
             break;
     }
-    
-    // Clean-up
-    _isActive = NO;
 
     NSString *group = job[@"group"];
     if (group && [self.engine fetchJobCountForGroup:group] == 0) {
