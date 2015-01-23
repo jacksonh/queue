@@ -84,7 +84,8 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 {
     if (data == nil) data = @{};
     [self.engine createJob:data priority:priority forTask:task inGroup:self.currentGroup];
-    [self tick];
+    if (!self.currentGroup)
+        [self tick];
 }
 
 /**
@@ -109,6 +110,7 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
     @finally {
         self.currentGroup = nil;
     }
+    [self tick];
 }
 
 /**
