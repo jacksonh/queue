@@ -20,11 +20,14 @@
 - (void)promoteDeferredJobs;
 - (void)removeJob:(NSNumber *)jid;
 - (void)removeAllJobs;
-- (NSUInteger)fetchJobCount;
-- (NSUInteger)fetchJobCountForGroup:(NSString *)group;
 - (NSDictionary *)fetchJob;
+- (NSDictionary *)fetchAndReserveJob;
 - (BOOL)reserveJob:(NSNumber *)jid;
 - (NSDictionary *)fetchJobForTask:(id)task;
 - (void)releaseAllLocks;
+
+// Includes locked jobs
+- (NSUInteger)fetchJobCount;
+- (NSUInteger)fetchJobCountForGroup:(NSString *)group;
 
 @end

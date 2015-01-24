@@ -157,7 +157,7 @@
     __block NSUInteger count = 0;
     
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE locked_at = 0 AND deferred = 0"];
+        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE deferred = 0"];
         [self _databaseHadError:[db hadError] fromDatabase:db];
 
         while ([rs next]) {
@@ -180,7 +180,7 @@
     __block NSUInteger count = 0;
 
     [self.queue inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE group_name = ? AND locked_at = 0 AND deferred = 0", group];
+        FMResultSet *rs = [db executeQuery:@"SELECT count(id) AS count FROM queue WHERE group_name = ? AND deferred = 0", group];
         [self _databaseHadError:[db hadError] fromDatabase:db];
 
         while ([rs next]) {
@@ -227,6 +227,28 @@
     }];
 
     return rowLocked;
+}
+
+- (NSDictionary *)fetchAndReserveJob
+{
+    __block NSDictionary *job;
+    [self.queue inDatabase:^(FMDatabase *db) {
+        FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue WHERE locked_at = 0 AND deferred = 0 ORDER BY priority DESC, id ASC LIMIT 1"];
+        [self _databaseHadError:[db hadError] fromDatabase:db];
+
+        while ([rs next]) {
+            job = [self _jobFromResultSet:rs];
+        }
+
+        [rs close];
+
+        [db executeUpdate:@"UPDATE queue set locked_at = ? WHERE id = ?", @([NSDate date].timeIntervalSince1970), job[@"id"]];
+        if ([self _databaseHadError:[db hadError] fromDatabase:db] || db.changes < 1) {
+            job = nil;
+        }
+    }];
+
+    return job;
 }
 
 - (void)releaseAllLocks
