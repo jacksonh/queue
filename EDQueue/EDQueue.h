@@ -52,6 +52,9 @@ extern NSString *const EDQueueDidDrain;
 - (BOOL)jobExistsForTask:(NSString *)task;
 - (NSDictionary *)nextJobForTask:(NSString *)task;
 
+- (void)enableLogging;
+- (void)disableLogging;
+
 @end
 
 @protocol EDQueueDelegate <NSObject>

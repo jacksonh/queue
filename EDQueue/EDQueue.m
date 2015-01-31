@@ -69,6 +69,16 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
     _engine = nil;
 }
 
+- (void)enableLogging;
+{
+    self.engine.logging = YES;
+}
+
+- (void)disableLogging
+{
+    self.engine.logging = NO;
+}
+
 #pragma mark - Public methods
 
 /**
