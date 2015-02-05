@@ -130,7 +130,7 @@
 {
     [self.queue inDatabase:^(FMDatabase *db) {
         if (self.logging) {
-            [db executeUpdate:@"UPDATE queue SET completed_at = ? WHERE id = ?", [NSDate date].timeIntervalSince1970, jid];
+	  [db executeUpdate:@"UPDATE queue SET completed_at = ? WHERE id = ?", @([NSDate date].timeIntervalSince1970), jid];
         } else {
             [db executeUpdate:@"DELETE FROM queue WHERE id = ?", jid];
         }
