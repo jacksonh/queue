@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'EDQueue'
-  s.version      = '0.7.4'
+  s.version      = '0.7.5'
   s.license      = 'MIT'
   s.summary      = 'A persistent background job queue for iOS.'
   s.homepage     = 'https://github.com/thisandagain/queue'
