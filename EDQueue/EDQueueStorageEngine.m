@@ -292,7 +292,7 @@
 	NSMutableArray *result = [[NSMutableArray alloc] init];
 
 	[self.queue inDatabase:^(FMDatabase *db) {
-		FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY id ASC"];
+		FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY id DESC"];
 		[self _databaseHadError:[db hadError] fromDatabase:db];
 
 		while ([rs next]) {
