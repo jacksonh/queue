@@ -292,7 +292,7 @@
 	NSMutableArray *result = [[NSMutableArray alloc] init];
 
 	[self.queue inDatabase:^(FMDatabase *db) {
-		FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY priority DESC, id ASC LIMIT 1"];
+		FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY id ASC"];
 		[self _databaseHadError:[db hadError] fromDatabase:db];
 
 		while ([rs next]) {
@@ -316,7 +316,9 @@
         @"data":        [NSJSONSerialization JSONObjectWithData:[[rs stringForColumn:@"data"] dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil],
         @"priority":    @([rs intForColumn:@"priority"]),
         @"attempts":    [NSNumber numberWithInt:[rs intForColumn:@"attempts"]],
-        @"stamp":       [rs stringForColumn:@"stamp"]
+        @"stamp":			[rs stringForColumn:@"stamp"],
+		@"deferred":		@([rs intForColumn:@"deferred"]),
+		@"completed_at":	@([rs intForColumn:@"completed_at"]),
     };
     NSString *group = [rs stringForColumn:@"group_name"];
     if (group) {
