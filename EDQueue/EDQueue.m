@@ -299,4 +299,9 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
     NSLog(@"EDQueue Error: %@", message);
 }
 
+- (NSArray *)fetchAllJobs
+{
+	return [self.engine fetchAllJobs];
+}
+
 @end

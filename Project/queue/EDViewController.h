@@ -16,5 +16,6 @@
 - (IBAction)addSuccess:(id)sender;
 - (IBAction)addFail:(id)sender;
 - (IBAction)addCritical:(id)sender;
+- (IBAction)fetchAllJobs:(id)sender;
 
 @end

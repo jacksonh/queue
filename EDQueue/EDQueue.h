@@ -55,6 +55,8 @@ extern NSString *const EDQueueDidDrain;
 - (void)enableLogging;
 - (void)disableLogging;
 
+- (NSArray *)fetchAllJobs;
+
 @end
 
 @protocol EDQueueDelegate <NSObject>

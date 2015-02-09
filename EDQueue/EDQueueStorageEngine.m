@@ -287,6 +287,25 @@
     return job;
 }
 
+- (NSArray *)fetchAllJobs
+{
+	NSMutableArray *result = [[NSMutableArray alloc] init];
+
+	[self.queue inDatabase:^(FMDatabase *db) {
+		FMResultSet *rs = [db executeQuery:@"SELECT * FROM queue ORDER BY priority DESC, id ASC LIMIT 1"];
+		[self _databaseHadError:[db hadError] fromDatabase:db];
+
+		while ([rs next]) {
+			NSDictionary *job = [self _jobFromResultSet:rs];
+			[result addObject:job];
+		}
+
+		[rs close];
+	}];
+
+	return [result copy];
+}
+
 #pragma mark - Private methods
 
 - (NSDictionary *)_jobFromResultSet:(FMResultSet *)rs

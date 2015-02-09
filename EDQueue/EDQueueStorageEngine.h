@@ -30,6 +30,8 @@
 - (NSUInteger)fetchJobCount;
 - (NSUInteger)fetchJobCountForGroup:(NSString *)group;
 
+- (NSArray *)fetchAllJobs;
+
 @property (assign, nonatomic) BOOL logging;
 
 @end

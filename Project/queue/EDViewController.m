@@ -50,6 +50,11 @@
     [[EDQueue sharedInstance] enqueueWithData:nil forTask:@"critical"];
 }
 
+- (IBAction)fetchAllJobs:(id)sender
+{
+	NSLog (@"ALL JOBS:%@\n", [[EDQueue sharedInstance] fetchAllJobs]);
+}
+
 - (IBAction)addGroup:(id)sender
 {
     [[EDQueue sharedInstance] stop];
