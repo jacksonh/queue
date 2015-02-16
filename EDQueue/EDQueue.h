@@ -21,7 +21,7 @@ typedef NS_ENUM(NSInteger, EDQueuePriority) {
     EDQueuePriorityHigh,
 };
 
-typedef void (^EDQueueCompletionBlock)(EDQueueResult result);
+typedef void (^EDQueueCompletionBlock)(EDQueueResult result, NSString *response);
 
 extern NSString *const EDQueueDidStart;
 extern NSString *const EDQueueDidStop;

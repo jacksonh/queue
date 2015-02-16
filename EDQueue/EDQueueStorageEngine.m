@@ -24,12 +24,12 @@
         // Database path
         NSArray *paths                  = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask,YES);
         NSString *documentsDirectory    = [paths objectAtIndex:0];
-        NSString *path                  = [documentsDirectory stringByAppendingPathComponent:@"edqueue_0.7.6d.db"];
+        NSString *path                  = [documentsDirectory stringByAppendingPathComponent:@"edqueue_0.7.10d.db"];
 
         // Allocate the queue
         _queue                          = [[FMDatabaseQueue alloc] initWithPath:path];
         [self.queue inDatabase:^(FMDatabase *db) {
-            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, group_name TEXT, priority INTEGER DEFAULT 0, deferred INTEGER DEFAULT 0, data TEXT NOT NULL, locked_at NUMERIC DEFAULT 0, completed_at NUMERIC DEFAULT 0, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT)"];
+            [db executeUpdate:@"CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY, task TEXT NOT NULL, group_name TEXT, priority INTEGER DEFAULT 0, deferred INTEGER DEFAULT 0, data TEXT NOT NULL, locked_at NUMERIC DEFAULT 0, completed_at NUMERIC DEFAULT 0, attempts INTEGER DEFAULT 0, stamp STRING DEFAULT (strftime('%s','now')) NOT NULL, udef_1 TEXT, udef_2 TEXT, response TEXT)"];
             [self _databaseHadError:[db hadError] fromDatabase:db];
             NSLog (@"db error:  %d", db.hadError);
         }];
@@ -130,12 +130,24 @@
 {
     [self.queue inDatabase:^(FMDatabase *db) {
         if (self.logging) {
-	  [db executeUpdate:@"UPDATE queue SET completed_at = ? WHERE id = ?", @([NSDate date].timeIntervalSince1970), jid];
+			[db executeUpdate:@"UPDATE queue SET completed_at = ? WHERE id = ?", @([NSDate date].timeIntervalSince1970), jid];
         } else {
             [db executeUpdate:@"DELETE FROM queue WHERE id = ?", jid];
         }
         [self _databaseHadError:[db hadError] fromDatabase:db];
     }];
+}
+
+- (void)removeJob:(NSNumber *)jid withResponse:(NSString *)response
+{
+	[self.queue inDatabase:^(FMDatabase *db) {
+		if (self.logging) {
+			[db executeUpdate:@"UPDATE queue SET completed_at = ?, response = ?, WHERE id = ?", @([NSDate date].timeIntervalSince1970), jid, response];
+		} else {
+			[db executeUpdate:@"DELETE FROM queue WHERE id = ?", jid];
+		}
+		[self _databaseHadError:[db hadError] fromDatabase:db];
+	}];
 }
 
 /**
@@ -326,12 +338,21 @@
         [job setValue:group forKey:@"group"];
         job = [job copy];
     }
+	NSString *response = [rs stringForColumn:@"response"];
+	if (response) {
+		job = [job mutableCopy];
+		[job setValue:group forKey:@"response"];
+		job = [job copy];
+	}
+
     return job;
 }
 
 - (BOOL)_databaseHadError:(BOOL)flag fromDatabase:(FMDatabase *)db
 {
-    if (flag) NSLog(@"Queue Database Error %d: %@", [db lastErrorCode], [db lastErrorMessage]);
+	if (flag) {
+		NSLog(@"Queue Database Error %d: %@", [db lastErrorCode], [db lastErrorMessage]);
+	}
     return flag;
 }
 

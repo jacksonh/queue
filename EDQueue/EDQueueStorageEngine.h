@@ -19,6 +19,7 @@
 - (void)deferJob:(NSNumber *)jid;
 - (void)promoteDeferredJobs;
 - (void)removeJob:(NSNumber *)jid;
+- (void)removeJob:(NSNumber *)jid withResponse:(NSString *)response;
 - (void)removeAllJobs;
 - (NSDictionary *)fetchJob;
 - (NSDictionary *)fetchAndReserveJob;

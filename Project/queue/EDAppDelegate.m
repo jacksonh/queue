@@ -37,27 +37,27 @@
     [[EDQueue sharedInstance] stop];
 }
 
-- (void)queue:(EDQueue *)queue processJob:(NSDictionary *)job completion:(void (^)(EDQueueResult))block
+- (void)queue:(EDQueue *)queue processJob:(NSDictionary *)job completion:(void (^)(EDQueueResult result, NSString *response))block
 {
     sleep(1);
-    
+
     @try {
         if ([[job objectForKey:@"task"] isEqualToString:@"success"]) {
-            block(EDQueueResultSuccess);
+            block(EDQueueResultSuccess, nil);
         } else if ([[job objectForKey:@"task"] isEqualToString:@"fail"]) {
-            block(EDQueueResultFail);
+            block(EDQueueResultFail, nil);
         } else if ([[job objectForKey:@"task"] isEqualToString:@"groupTask"]) {
-            block(job[@"data"][@"fail"] ? EDQueueResultCritical : EDQueueResultSuccess);
+            block(job[@"data"][@"fail"] ? EDQueueResultCritical : EDQueueResultSuccess, nil);
         } else if ([job[@"task"] isEqualToString:@"deferredJob"]) {
             static BOOL seen = NO;
-            block(seen ? EDQueueResultSuccess : EDQueueResultDefer);
+            block(seen ? EDQueueResultSuccess : EDQueueResultDefer, nil);
             seen = !seen;
         } else {
-            block(EDQueueResultCritical);
+            block(EDQueueResultCritical, nil);
         }
     }
     @catch (NSException *exception) {
-        block(EDQueueResultCritical);
+        block(EDQueueResultCritical, nil);
     }
 }
 

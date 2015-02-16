@@ -220,26 +220,26 @@ NSString *const EDQueueDidDrain = @"EDQueueDidDrain";
 
         // Pass job to delegate
         if ([self.delegate respondsToSelector:@selector(queue:processJob:completion:)]) {
-            [self.delegate queue:self processJob:job completion:^(EDQueueResult result) {
+            [self.delegate queue:self processJob:job completion:^(EDQueueResult result, NSString *response) {
                 dispatch_sync(self.processQueue, ^{
-                    [self processJob:job withResult:result];
+                    [self processJob:job withResult:result andResponse:response];
                 });
             }];
         } else {
             EDQueueResult result = [self.delegate queue:self processJob:job];
-            [self processJob:job withResult:result];
+            [self processJob:job withResult:result andResponse:nil];
         }
         NSLog (@"finished queue");
     });
 }
 
-- (void)processJob:(NSDictionary*)job withResult:(EDQueueResult)result
+- (void)processJob:(NSDictionary*)job withResult:(EDQueueResult)result andResponse:(NSString *)response
 {
     // Check result
     switch (result) {
         case EDQueueResultSuccess:
             [self performSelectorOnMainThread:@selector(postNotification:) withObject:[NSDictionary dictionaryWithObjectsAndKeys:EDQueueJobDidSucceed, @"name", job, @"data", nil] waitUntilDone:false];
-            [self.engine removeJob:[job objectForKey:@"id"]];
+            [self.engine removeJob:[job objectForKey:@"id"] withResponse:response];
             break;
         case EDQueueResultDefer:
             [self.engine deferJob:job[@"id"]];
